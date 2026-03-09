@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "chip8.hpp"
+#include "core/chip8.hpp"
 
 using namespace chip8;
 
