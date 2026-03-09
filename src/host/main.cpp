@@ -89,19 +89,38 @@ int main(int argc, char* argv[])
         }
 
         bool running = true;
+        bool paused  = false;
+        int  frames  = 0;
+        Uint32 fps_timer = SDL_GetTicks();
+
         while (running) {
             Uint32 frame_start = SDL_GetTicks();
 
             // 1. Poll host input
-            if (input.poll(vm.keypad))
-                running = false;
+            switch (input.poll(vm.keypad)) {
+                case chip8::Action::quit:
+                    running = false;
+                    break;
+                case chip8::Action::toggle_pause:
+                    paused = !paused;
+                    break;
+                case chip8::Action::reset:
+                    vm = chip8::Chip8{};
+                    vm.load_rom(rom);
+                    paused = false;
+                    break;
+                case chip8::Action::none:
+                    break;
+            }
 
-            // 2. Run N instruction cycles per frame
-            for (int i = 0; i < cfg.cycles; ++i)
-                vm.cycle();
+            if (!paused) {
+                // 2. Run N instruction cycles per frame
+                for (int i = 0; i < cfg.cycles; ++i)
+                    vm.cycle();
 
-            // 3. Tick timers at 60 Hz
-            vm.tick_timers();
+                // 3. Tick timers at 60 Hz
+                vm.tick_timers();
+            }
 
             // 4. Render when the interpreter set draw_flag
             if (vm.draw_flag) {
@@ -109,13 +128,27 @@ int main(int argc, char* argv[])
                 vm.draw_flag = false;
             }
 
-            // 5. Audio: beep while sound timer > 0
-            if (vm.beep_flag)
+            // 5. Audio: beep while sound timer > 0 (silence when paused)
+            if (vm.beep_flag && !paused)
                 audio.beep();
             else
                 audio.silence();
 
-            // 6. Cap at ~60 FPS
+            // 6. Update title with FPS every second
+            ++frames;
+            Uint32 now = SDL_GetTicks();
+            if (now - fps_timer >= 1000) {
+                std::string title = "CHIP-8";
+                if (paused)
+                    title += " [PAUSED]";
+                else
+                    title += " | " + std::to_string(frames) + " FPS";
+                display.set_title(title.c_str());
+                frames = 0;
+                fps_timer = now;
+            }
+
+            // 7. Cap at ~60 FPS
             Uint32 elapsed = SDL_GetTicks() - frame_start;
             if (elapsed < static_cast<Uint32>(FRAME_DELAY_MS))
                 SDL_Delay(static_cast<Uint32>(FRAME_DELAY_MS) - elapsed);

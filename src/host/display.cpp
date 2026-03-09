@@ -53,4 +53,9 @@ void Display::render(
     SDL_RenderPresent(renderer_);
 }
 
+void Display::set_title(const char* title)
+{
+    SDL_SetWindowTitle(window_, title);
+}
+
 } // namespace chip8

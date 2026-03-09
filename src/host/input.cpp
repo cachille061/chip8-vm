@@ -30,18 +30,23 @@ int scancode_to_key(SDL_Scancode sc)
 
 } // anonymous namespace
 
-bool Input::poll(std::array<bool, NUM_KEYS>& keypad)
+Action Input::poll(std::array<bool, NUM_KEYS>& keypad)
 {
+    Action result = Action::none;
     SDL_Event ev;
     while (SDL_PollEvent(&ev)) {
         switch (ev.type) {
             case SDL_QUIT:
-                return true;
+                return Action::quit;
 
             case SDL_KEYDOWN:
                 if (ev.key.keysym.scancode == SDL_SCANCODE_ESCAPE)
-                    return true;
-                if (int k = scancode_to_key(ev.key.keysym.scancode); k >= 0)
+                    return Action::quit;
+                if (ev.key.keysym.scancode == SDL_SCANCODE_P)
+                    result = Action::toggle_pause;
+                else if (ev.key.keysym.scancode == SDL_SCANCODE_BACKSPACE)
+                    result = Action::reset;
+                else if (int k = scancode_to_key(ev.key.keysym.scancode); k >= 0)
                     keypad[static_cast<std::size_t>(k)] = true;
                 break;
 
@@ -54,7 +59,7 @@ bool Input::poll(std::array<bool, NUM_KEYS>& keypad)
                 break;
         }
     }
-    return false;
+    return result;
 }
 
 } // namespace chip8

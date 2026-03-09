@@ -21,6 +21,9 @@ public:
     /// Upload framebuffer to texture and present.
     void render(const std::array<std::uint8_t, DISPLAY_WIDTH * DISPLAY_HEIGHT>& fb);
 
+    /// Update the window title bar.
+    void set_title(const char* title);
+
 private:
     SDL_Window*   window_   = nullptr;
     SDL_Renderer* renderer_ = nullptr;

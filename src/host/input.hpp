@@ -7,6 +7,8 @@
 
 namespace chip8 {
 
+enum class Action { none, quit, toggle_pause, reset };
+
 /// Maps host keyboard events to the CHIP-8 hex keypad.
 ///
 /// Layout mapping (QWERTY → CHIP-8):
@@ -14,11 +16,13 @@ namespace chip8 {
 ///   Q W E R   →    4 5 6 D
 ///   A S D F        7 8 9 E
 ///   Z X C V        A 0 B F
+///
+/// Extra keys: P = pause/resume, Backspace = reset, Escape = quit
 class Input {
 public:
     /// Process all pending SDL events.
-    /// Updates `keypad` in-place and returns true if the user wants to quit.
-    bool poll(std::array<bool, NUM_KEYS>& keypad);
+    /// Updates `keypad` in-place and returns the highest-priority action.
+    Action poll(std::array<bool, NUM_KEYS>& keypad);
 };
 
 } // namespace chip8
