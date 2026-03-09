@@ -4,6 +4,7 @@
 
 #include <array>
 #include <cstdint>
+#include <random>
 #include <span>
 
 namespace chip8 {
@@ -39,8 +40,11 @@ public:
 
     bool draw_flag{};
     bool beep_flag{};
+    bool waiting_for_key{};
+    std::uint8_t key_register{};  // register to store key when waiting
 
 private:
+    std::mt19937 rng_{std::random_device{}()};
     // Built-in 4×5 font sprites (0–F), 80 bytes total.
     static constexpr std::array<std::uint8_t, 80> fontset{{
         0xF0, 0x90, 0x90, 0x90, 0xF0, // 0

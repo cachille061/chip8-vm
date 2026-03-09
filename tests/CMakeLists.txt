@@ -11,6 +11,7 @@ FetchContent_MakeAvailable(googletest)
 
 add_executable(chip8_tests
     test_chip8.cpp
+    test_opcodes.cpp
 )
 
 target_link_libraries(chip8_tests PRIVATE chip8_core GTest::gtest_main)
